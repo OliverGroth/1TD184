@@ -38,7 +38,8 @@ def levmarq(func,x0):
 	pass
 
 
-
+def jacobi()
+	pass
 
 # Compute residual
 def residualfunc(x):
