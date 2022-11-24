@@ -1,6 +1,3 @@
-import numpy as np
-import matplotlib.pyplot as plt
-
 # Optimisation - Assignment 1 - Levenberg-Marquardt
 
 """ Write a implementation of the Levenberg-Marquardt algorithm 
@@ -29,23 +26,6 @@ import matplotlib.pyplot as plt
 	fixed value, but in order for the function to be reliable for a 
 	variety of problems, some kind of updating strategy will be
 	necessary. Hints given on this in the instructions. """
-
-	"""	IMPLEMENTATION """
-	"""	-------------- """
-
-# Compute least squares approximation via Levenberg-Marquardt
-def levmarq(func,x0):
-	pass
-
-
-def jacobi()
-	pass
-
-# Compute residual
-def residualfunc(x):
-	pass
-
-
 
 
 	
