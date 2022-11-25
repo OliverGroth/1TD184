@@ -1,4 +1,4 @@
-# Optimisation - Assignment 1 - Levenberg-Marquardt
+## Optimisation - Assignment 1 - Levenberg-Marquardt
 
 """ Write a implementation of the Levenberg-Marquardt algorithm 
 	for the solution of an arbitratry nonlinear least squares problem
@@ -37,7 +37,7 @@
 	In each step, the parameter vector beta is replaced by a new estimate
 	beta + delta. To determine delta, the function f(x_i,beta+delta) is
 	approximated by its linearization f(x_i,beta) + J_i * delta, where
-	J_i is the partial derivative of f with respext to beta (gradient of
+	J_i is the partial derivative of f with respect to beta (gradient of
 	f with respect to beta).
 
 	The sum S(beta) of square deviations has its minumum at a zero
@@ -79,21 +79,66 @@
 
 import numpy as np
 
-def levmarq(func, x, grad = None):
+func = lambda x_1, x_2, t: x_1*exp(x_2*t)
 
+def levmarq(func, x, t, y, grad = None):
+
+	l = 0.5 #lambda
 	# beta approximation
 	# f(x_i,beta+delta) ≈ f(x_i,beta) + J_i*delta
 	# J_i = df(x_i,beta)/dbeta
 
+	# (J^T*J + lambda*I)delta = J^T[y-f(beta)]
+
+	J = jacobian(func, x, t)
+	Jt = np.transpose(J)
+
+	mat1 = np.matmul(Jt,J) + l*np.identity(m)
+	mat1inv = np.linalg.inv(mat1)
+	res = residual(t,y,func,x)
+	mat2 = np.matmul(Jt,res)
+	delta = np.matmul(mat1inv,mat2)
+
+	x = x+delta
 	# if gradient given, above is easy, however should work without given gradient
 	# so we have to create an approximation of the gradient
 
+	#if, check if good enough
+	#else
 
-def gradient():
 
+def jacobian(func, x, t, h = 10**(-3)):
+
+	n = len(x)
+	m = len(t)
+
+	J = zeros(n,m)
+
+	for i in range(n):
+		for j in range(m):
+			# d = nånting nånting löser differenc saundbas
+			J[i,j] = d
+
+	return J
 	# Computes gradient by finite differencing
 	# Gradient of S with respect to beta equals -2(J^T[y-f(beta)])^T
 	# Gradient of 
+
+	# J_i = partial derivative of f(x_i,beta) with respect to beta
+
+	# is finite differencing necessary when function is known?
+
+	# Will return a n x m-matrix where n is the number of parameters and m is the number of t-values
+
+def residual(t,y,func,x):
+
+	m = len(t)
+	res = zeros(1,m)
+
+	for i in range(m):
+		res[i] = y[i] - func(x[1],x[2],t[i])
+
+	return res, norm(res)
 
 
 
