@@ -1,4 +1,4 @@
-## Optimisation - Assignment 1 - Levenberg-Marquardt
+# Optimisation - Assignment 1 - Levenberg-Marquardt
 
 """ Write a implementation of the Levenberg-Marquardt algorithm 
 	for the solution of an arbitratry nonlinear least squares problem
@@ -79,7 +79,7 @@
 
 import numpy as np
 
-func = lambda x_1, x_2, t: x_1*exp(x_2*t)
+func = lambda x, t: x[0]*np.exp(x[1]*t)
 
 def levmarq(func, x, t, y, grad = None):
 
@@ -89,17 +89,27 @@ def levmarq(func, x, t, y, grad = None):
 	# J_i = df(x_i,beta)/dbeta
 
 	# (J^T*J + lambda*I)delta = J^T[y-f(beta)]
+	maxiter = 10**4
+	TOL = 10**(-5)
+	iters = 0
+	err = 2*TOL
+	n = len(x)
+	m = len(t)
+	while iters < maxiter and err > TOL:
+		J = jacobian(func, x, t)
+		J = np.transpose(J)
+		Jt = np.transpose(J)
 
-	J = jacobian(func, x, t)
-	Jt = np.transpose(J)
+		mat1 = np.matmul(Jt,J) + l*np.identity(n)
+		mat1inv = np.linalg.inv(mat1)
+		res = residual(t,y,func,x)
+		mat2 = np.matmul(Jt,np.transpose(res[0]))
+		delta = np.matmul(mat1inv,mat2)
 
-	mat1 = np.matmul(Jt,J) + l*np.identity(m)
-	mat1inv = np.linalg.inv(mat1)
-	res = residual(t,y,func,x)
-	mat2 = np.matmul(Jt,res)
-	delta = np.matmul(mat1inv,mat2)
-
-	x = x+delta
+		x = x+delta
+		iters += 1
+		err = res[1]
+	return x, res[0], res[1]
 	# if gradient given, above is easy, however should work without given gradient
 	# so we have to create an approximation of the gradient
 
@@ -109,14 +119,17 @@ def levmarq(func, x, t, y, grad = None):
 
 def jacobian(func, x, t, h = 10**(-3)):
 
-	n = len(x)
-	m = len(t)
+	n = len(x) # antal parametrar
+	m = len(t) # antal datapunkter
 
-	J = zeros(n,m)
+	J = np.zeros([n,m]) # jacobianen
 
 	for i in range(n):
+		z = np.zeros(n)
+		z[i] = h
 		for j in range(m):
-			# d = nånting nånting löser differenc saundbas
+			#print(z)
+			d = (func(x+z,t[j])-func(x-z,t[j]))/(2*h)
 			J[i,j] = d
 
 	return J
@@ -133,15 +146,21 @@ def jacobian(func, x, t, h = 10**(-3)):
 def residual(t,y,func,x):
 
 	m = len(t)
-	res = zeros(1,m)
+	res = np.zeros(m)
 
 	for i in range(m):
-		res[i] = y[i] - func(x[1],x[2],t[i])
+		res[i] = y[i] - func(x,t[i])
 
-	return res, norm(res)
-
-
+	return res, np.linalg.norm(res)
 
 
 
-return x, resnorm, residual
+
+
+t = np.array([0.5, 1.0, 1.5, 2.0, 2.5, 3.0, 3.5, 4.0])
+y = np.array([7.2, 3.0, 1.5, 0.85, 0.48, 0.25, 0.20, 0.15])
+x0 = np.array([-20, 5])
+
+lev = levmarq(func, x0, t, y)
+print(lev)
+
