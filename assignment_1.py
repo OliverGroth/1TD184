@@ -81,40 +81,26 @@ import numpy as np
 
 func = lambda x, t: x[0]*np.exp(x[1]*t)
 
-def levmarq(func, x, t, y, grad = None):
 
-	l = 0.5 #lambda
-	# beta approximation
-	# f(x_i,beta+delta) ≈ f(x_i,beta) + J_i*delta
-	# J_i = df(x_i,beta)/dbeta
-
-	# (J^T*J + lambda*I)delta = J^T[y-f(beta)]
-	maxiter = 10**4
-	TOL = 10**(-5)
-	iters = 0
-	err = 2*TOL
+def levmarq(func, x, t, y, l, grad = None):
+	
 	n = len(x)
 	m = len(t)
-	while iters < maxiter and err > TOL:
-		J = jacobian(func, x, t)
-		J = np.transpose(J)
-		Jt = np.transpose(J)
 
-		mat1 = np.matmul(Jt,J) + l*np.identity(n)
-		mat1inv = np.linalg.inv(mat1)
-		res = residual(t,y,func,x)
-		mat2 = np.matmul(Jt,np.transpose(res[0]))
-		delta = np.matmul(mat1inv,mat2)
+	J = jacobian(func, x, t)
+	Jt = np.transpose(J)
 
-		x = x+delta
-		iters += 1
-		err = res[1]
+	print(l)
+	mat1 = np.matmul(Jt,J) + l*np.identity(n)
+	mat1inv = np.linalg.inv(mat1)
+	res = residual(t,y,func,x)
+	mat2 = np.matmul(Jt,np.transpose(res[0]))
+	delta = np.matmul(mat1inv,mat2)
+
+	x = x+delta
+	err = res[1]
+
 	return x, res[0], res[1]
-	# if gradient given, above is easy, however should work without given gradient
-	# so we have to create an approximation of the gradient
-
-	#if, check if good enough
-	#else
 
 
 def jacobian(func, x, t, h = 10**(-3)):
@@ -122,7 +108,7 @@ def jacobian(func, x, t, h = 10**(-3)):
 	n = len(x) # antal parametrar
 	m = len(t) # antal datapunkter
 
-	J = np.zeros([n,m]) # jacobianen
+	J = np.zeros([m,n]) # jacobianen
 
 	for i in range(n):
 		z = np.zeros(n)
@@ -130,18 +116,10 @@ def jacobian(func, x, t, h = 10**(-3)):
 		for j in range(m):
 			#print(z)
 			d = (func(x+z,t[j])-func(x-z,t[j]))/(2*h)
-			J[i,j] = d
+			J[j,i] = d
 
 	return J
-	# Computes gradient by finite differencing
-	# Gradient of S with respect to beta equals -2(J^T[y-f(beta)])^T
-	# Gradient of 
 
-	# J_i = partial derivative of f(x_i,beta) with respect to beta
-
-	# is finite differencing necessary when function is known?
-
-	# Will return a n x m-matrix where n is the number of parameters and m is the number of t-values
 
 def residual(t,y,func,x):
 
@@ -154,6 +132,65 @@ def residual(t,y,func,x):
 	return res, np.linalg.norm(res)
 
 
+def damp(func, x, t, y, l, nu, res0):
+	# 1 förra värdets residualnorm (bra om sparat slippa räkna igen)
+	# RETURNERA DETTA SÅ ATT DET KAN SKICKAS MED SOM INPUT
+
+	# 2 beräkna residualnorm efter steg med l, kalla res1
+	res1 = levmarq(func, x, t, y, l)[2]
+
+	# 3 beräkna residualnorm efter steg med l/nu, kalla res2
+	res2 = levmarq(func, x, t, y, l/nu)[2]
+
+	# jämför 1, 2 och 3 
+
+	# om 1 bäst:
+	# while-loop där vi tar fram nya residualnormer för
+	# efter steg med l*v^k (k antal iterationer)
+	# (l senaste lambdat)
+
+	res = res0 + 1
+
+	if min(res1, res2) > res0:
+		while res > res0 and l < 100:
+			l = l*nu
+			res = levmarq(func, x, t, y, l)[2]
+		return l, res
+
+	# om 2 eller 3 bäst, använd det deltat för 
+	# nytt x och spara residualen för nästa jämförelse 	
+
+	if res2 < res1:
+		return l/nu, res2
+	else:
+		return l, res1
+	
+
+def main(func,t,y,x0):
+
+
+	l0 = 0.5 #lambda
+	nu = 1.5 # ny!!
+
+	res = [0,0]	
+	
+	maxiter = 10**4
+	TOL = 10**(-5)
+	iters = 0
+	err = 2*TOL
+	res0 = residual(t,y,func,x0)[1]
+	x = x0
+
+	while iters < maxiter and err > TOL:
+		
+		l, res0 = damp(func, x, t, y, l0, nu, res0)
+		x, res[0], res[1] = levmarq(func, x, t, y, l)
+		iters += 1
+		err = res[1]
+	
+	return x, err
+
+
 
 
 
@@ -161,6 +198,6 @@ t = np.array([0.5, 1.0, 1.5, 2.0, 2.5, 3.0, 3.5, 4.0])
 y = np.array([7.2, 3.0, 1.5, 0.85, 0.48, 0.25, 0.20, 0.15])
 x0 = np.array([-20, 5])
 
-lev = levmarq(func, x0, t, y)
-print(lev[0])
-
+x, err = main(func,t,y,x0)
+print(x)
+print(err)
