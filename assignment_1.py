@@ -162,5 +162,5 @@ y = np.array([7.2, 3.0, 1.5, 0.85, 0.48, 0.25, 0.20, 0.15])
 x0 = np.array([-20, 5])
 
 lev = levmarq(func, x0, t, y)
-print(lev)
+print(lev[0])
 
