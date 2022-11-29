@@ -78,8 +78,11 @@
 """
 
 import numpy as np
+import scipy.optimize as opt
 
 func = lambda x, t: x[0]*np.exp(x[1]*t)
+
+ver = lambda x, t, y: x[0]*np.exp(x[1]*t) - y
 
 
 def levmarq(func, x, t, y, l, grad = None):
@@ -198,5 +201,7 @@ y = np.array([7.2, 3.0, 1.5, 0.85, 0.48, 0.25, 0.20, 0.15])
 x0 = np.array([-20, 5])
 
 x, err = main(func,t,y,x0)
+x_ver = opt.least_squares(lambda x: ver(x,t,y),x0)
 print(x)
 print(err)
+print(x_ver.x)
