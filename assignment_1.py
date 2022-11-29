@@ -90,7 +90,6 @@ def levmarq(func, x, t, y, l, grad = None):
 	J = jacobian(func, x, t)
 	Jt = np.transpose(J)
 
-	print(l)
 	mat1 = np.matmul(Jt,J) + l*np.identity(n)
 	mat1inv = np.linalg.inv(mat1)
 	res = residual(t,y,func,x)
@@ -103,7 +102,7 @@ def levmarq(func, x, t, y, l, grad = None):
 	return x, res[0], res[1]
 
 
-def jacobian(func, x, t, h = 10**(-3)):
+def jacobian(func, x, t, h = 10**(-5)):
 
 	n = len(x) # antal parametrar
 	m = len(t) # antal datapunkter
@@ -114,7 +113,6 @@ def jacobian(func, x, t, h = 10**(-3)):
 		z = np.zeros(n)
 		z[i] = h
 		for j in range(m):
-			#print(z)
 			d = (func(x+z,t[j])-func(x-z,t[j]))/(2*h)
 			J[j,i] = d
 
@@ -159,6 +157,7 @@ def damp(func, x, t, y, l, nu, res0):
 
 	# om 2 eller 3 bäst, använd det deltat för 
 	# nytt x och spara residualen för nästa jämförelse 	
+
 
 	if res2 < res1:
 		return l/nu, res2
