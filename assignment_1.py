@@ -177,19 +177,21 @@ def main(func,t,y,x0):
 	res = [0,0]	
 	
 	maxiter = 10**4
-	TOL = 10**(-5)
+	TOL = 10**(-4)
 	iters = 0
 	err = 2*TOL
 	res0 = residual(t,y,func,x0)[1]
 	x = x0
+	xdiff = 2*TOL
 
-	while iters < maxiter and err > TOL:
-		
+	while iters < maxiter and xdiff > TOL:
+		xprev = x
 		l, res0 = damp(func, x, t, y, l0, nu, res0)
 		x, res[0], res[1] = levmarq(func, x, t, y, l)
+		xdiff = np.linalg.norm(xprev-x)
 		iters += 1
 		err = res[1]
-	
+	print(iters)
 	return x, err
 
 
@@ -205,3 +207,4 @@ x_ver = opt.least_squares(lambda x: ver(x,t,y),x0)
 print(x)
 print(err)
 print(x_ver)
+print(np.linalg.norm(x_ver.fun))
