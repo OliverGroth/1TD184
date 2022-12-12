@@ -28,32 +28,52 @@ QUESTIONS:
 
 import numpy as np
 import matplotlib.pyplot as plt
+from sklearn import datasets, model_selection
 
 def gradient(lmb, w, b, sign, y, x):
 	return np.array([lmb*w, 0]) if sign else np.array([(lmb*w-y*x),-y])
 
-def cumstraint(x, y, w, b)
-	return y*(w*x+b) >= 1
+def cumstraint(x, y, w, b):
+	return y*(np.dot(w,x)+b) >= 1
 
-def SVM:
+def SVM(X, y, lmb=0.01, gamma=0.001):
 
-	w = np.zeros(np.shape(x)[0])
+	maxiter = 1000
+	w = np.zeros(X.shape[1])
 	b = 0
 
 	# massa skit i början
 
-	for _ in range(maxiter)#eller tills nöjd typ?:
-		for #loopa genom skiten
-			[dw, db] = gradient(lmb, w, b, cumstraint(x, y, w, b), y, x)
+	for _ in range(maxiter): #eller tills nöjd typ?
+		for i, x in enumerate(X): #loopa genom skiten
+			D = gradient(lmb, w, b, cumstraint(x, y[i], w, b), y[i], x)
 
-			w -= gamma*dw
-			b -= gamma*db
+			w -= gamma*D[0]
+			b -= gamma*D[1]
 
+	return w, b
 
+# Below from article to test model
 
-gamma = 0.001
+X, y = datasets.make_blobs(
+    n_samples=250, n_features=2, centers=2, cluster_std=1.05, random_state=1
+)
 
-print(gradient(1,1,1,True,1,1))
+X_train, X_test, y_train, y_test = model_selection.train_test_split(X, y, test_size=0.1, shuffle=True, random_state=1)
+
+y_train = np.where(y_train <= 0, -1, 1)
+
+w,b = SVM(X_train,y_train)
+
+est = np.dot(X_test, w) + b
+prediction = np.sign(est)
+result = np.where(prediction == -1, 0, 1)
+
+def accuracy(y_true, y_pred):
+    accuracy = np.sum(y_true==y_pred) / len(y_true)
+    return accuracy
+
+print("SVM Accuracy: ", accuracy(y_test, result))
 
 
 
