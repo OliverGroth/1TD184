@@ -31,6 +31,23 @@ QUESTIONS:
 (*) Implementation???
 """
 
+import numpy as np
+import matplotlib.pyplot as plt
+
+def gradient(lmb, w, b, sign, y, x):
+	return np.array([lmb*w, 0]) if sign else np.array([(lmb*w-y*x),-y])
+
+def SVM:
+	
+
+gamma = 0.001
+
+print(gradient(1,1,1,True,1,1))
+
+
+
+
+
   
 
  
