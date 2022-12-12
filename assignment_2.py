@@ -13,13 +13,22 @@ This is equivalent to y_i*(w*x_i + b) >= 1
 We can have two planes, one at the edge of one cluster and one at the edge of the other. The plane 
 that then maximizes the margin between the plane and the clusters i then the plane in the middle of 
 these two planes. The distance between these two planes is 2/norm(w), thus to maximize distance
-we want to minimize w. 
+we want to minimize norm(w) = w^T*w. 
 
 This relaxation moves the lines towards eachother (even past?). If we also penalise this relaxation 
 (because it is not ideal?) we get an optimisation problem:
 
 minimise f(w,b) = 1/2*w^T*w + C*sum_{i=1}^m xi_i
 sub. to y_i(w^T*x_i + b) >= 1 - xi_i, i = 1,...,m ; xi_i >= 0
+
+This is a problem which can be solved with quadratic programming (https://en.wikipedia.org/wiki/Quadratic_programming).
+But this is actually least squares?? Can use a least squares algorithm like gradient descent? 
+
+INTRESSANT: https://towardsdatascience.com/implementing-svm-from-scratch-784e4ad0bc6a
+
+QUESTIONS:
+(*) How do we optimize to get w and b?
+(*) Implementation???
 """
 
   
