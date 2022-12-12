@@ -33,7 +33,7 @@ from sklearn import datasets, model_selection
 def gradient(lmb, w, b, sign, y, x):
 	return np.array([lmb*w, 0]) if sign else np.array([(lmb*w-y*x),-y])
 
-def cumstraint(x, y, w, b):
+def constraint(x, y, w, b):
 	return y*(np.dot(w,x)+b) >= 1
 
 def SVM(X, y, lmb=0.01, gamma=0.001):
@@ -46,7 +46,7 @@ def SVM(X, y, lmb=0.01, gamma=0.001):
 
 	for _ in range(maxiter): #eller tills nöjd typ?
 		for i, x in enumerate(X): #loopa genom skiten
-			D = gradient(lmb, w, b, cumstraint(x, y[i], w, b), y[i], x)
+			D = gradient(lmb, w, b, constraint(x, y[i], w, b), y[i], x)
 
 			w -= gamma*D[0]
 			b -= gamma*D[1]
