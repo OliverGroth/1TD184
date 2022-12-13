@@ -37,9 +37,34 @@ def gradient(lmb, w, b, sign, y, x):
 def constraint(x, y, w, b):
 	return y*(np.dot(w,x)+b) >= 1
 
+def data():
+	# data stuff
+	# vi gillar inte pandorna
+	cols = ["ID", "Diag", "r_m", "txt_m", "per_m", "area_m", "smth_m", "comp_m", "conc_m", "conc_p_m", "sym_m", "frac_m", 
+			"r_s", "txt_s", "per_s", "area_s", "smth_s", "comp_s", "conc_s", "conc_p_s", "sym_s", "frac_s",
+			"r_w", "txt_w", "per_w", "area_w", "smth_w", "comp_w", "conc_w", "conc_p_w", "sym_w", "frac_w"]
+	#print(len(cols))
+	data = pd.read_table("wdbc.dat", sep=",", usecols = list(range(32)), names = cols)
+	data["Diag"] = data["Diag"].replace(['M', 'B'], [1, -1])
+
+	X = data.loc[:, ~data.columns.isin(['ID', 'Diag'])]
+	y = data["Diag"]
+
+
+	X = X.to_numpy() # ät skit pandas
+	y = y.to_numpy()
+
+	return X, y
+
+def traintest(X, y):
+	X_train, X_test, y_train, y_test = model_selection.train_test_split(X, y, test_size=0.1, shuffle=True, random_state=1)
+
+	return X_train, X_test, y_train, y_test
+
+
 def SVM(X, y, lmb=0.01, gamma=0.001):
 
-	maxiter = 1000
+	maxiter = 10000
 	w = np.zeros(X.shape[1])
 	b = 0
 
@@ -47,36 +72,42 @@ def SVM(X, y, lmb=0.01, gamma=0.001):
 
 	for _ in range(maxiter): #eller tills nöjd typ?
 		for i, x in enumerate(X): #loopa genom skiten
-			D = gradient(lmb, w, b, constraint(X.iloc[i], y[i], w, b), y[i], X.iloc[i])
+			#print(i)
+			#print(x)
+			#print("inshallah")
+			#print(X[0])
+			#print(y[0])
+			D = gradient(lmb, w, b, constraint(X[i], y[i], w, b), y[i], X[i])
 
 			w -= gamma*D[0]
 			b -= gamma*D[1]
 
 	return w, b
-cols = ["ID", "Diag", "r_m", "txt_m", "per_m", "area_m", "smth_m", "comp_m", "conc_m", "conc_p_m", "sym_m", "frac_m", 
-		"r_s", "txt_s", "per_s", "area_s", "smth_s", "comp_s", "conc_s", "conc_p_s", "sym_s", "frac_s",
-		"r_w", "txt_w", "per_w", "area_w", "smth_w", "comp_w", "conc_w", "conc_p_w", "sym_w", "frac_w"]
-print(len(cols))
-data = pd.read_table("wdbc.dat", sep=",", usecols = list(range(32)), names = cols)
-data["Diag"] = data["Diag"].replace(['M', 'B'], [1, -1])
-
-X = data.loc[:, ~data.columns.isin(['ID', 'Diag'])]
-y = data["Diag"]
-
-
-X_train, y_train, X_test, y_test = model_selection.train_test_split(X, y, test_size=0.1, shuffle=True, random_state=1)
-
-w,b = SVM(X_train,y_train)
-
-est = np.dot(X_test, w) + b
-prediction = np.sign(est)
-result = np.where(prediction == -1, 0, 1)
 
 def accuracy(y_true, y_pred):
     accuracy = np.sum(y_true==y_pred) / len(y_true)
     return accuracy
 
-print("SVM Accuracy: ", accuracy(y_test, result))
+def main():
+	X, y = data()
+	#print(np.shape(X))
+	#print(np.shape(y))
+	X_train, X_test, y_train, y_test = traintest(X, y)
+	#print(np.shape(X_train))
+	#print(np.shape(y_train))
+	#print(np.shape(X_test))
+	#print(np.shape(y_test))
+
+	w,b = SVM(X_train,y_train)
+	#print(b)
+	est = np.dot(X_test, w) + b
+	prediction = np.sign(est)
+	result = np.where(prediction == -1, 0, 1)
+
+	print("SVM Accuracy: ", accuracy(y_test, result))
+
+	return
+main()
 
 # Below from article to test model
 """
