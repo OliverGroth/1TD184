@@ -104,7 +104,7 @@ def levmarq(func, x, t, y, l, grad = None):
 
 	return x, res[0], res[1]
 
-
+# Detta är en kommentar 
 def jacobian(func, x, t, h = 10**(-5)):
 
 	n = len(x) # antal parametrar
