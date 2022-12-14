@@ -28,7 +28,7 @@ QUESTIONS:
 
 import numpy as np
 import matplotlib.pyplot as plt
-from sklearn import datasets, model_selection
+from sklearn import datasets, model_selection, svm
 import pandas as pd
 
 def gradient(lmb, w, b, sign, y, x):
@@ -101,10 +101,15 @@ def main():
 	w,b = SVM(X_train,y_train)
 	#print(b)
 	est = np.dot(X_test, w) + b
-	prediction = np.sign(est)
-	result = np.where(prediction == -1, 0, 1)
+	result = np.sign(est)
+	#prediction = np.sign(est)
+	#result = np.where(prediction == -1, -1, 1)
 
 	print("SVM Accuracy: ", accuracy(y_test, result))
+
+	GM = svm.SVC(kernel = 'linear')
+	GM.fit(X_train,y_train)
+	print("SKlearn Accuracy: ", accuracy(y_test, GM.predict(X_test)))
 
 	return
 main()
